@@ -4,7 +4,7 @@
 #define cube_size 20
 #define side 40
 #include<mmsystem.h>
-#pragma comment(lib,"winmm.lib")j'h'j'h'j'h
+#pragma comment(lib,"winmm.lib")
 using namespace std;
 bool is_running;jhjhjh
 bool is_continue;

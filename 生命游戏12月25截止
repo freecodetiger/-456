@@ -1,0 +1,117 @@
+#include<iostream>
+#include<graphics.h>
+//EasyX 
+#define cube_size 20
+#define side 40
+#include<mmsystem.h>
+#pragma comment(lib,"winmm.lib")
+using namespace std;
+bool is_running;
+bool is_continue;
+bool field[side][side];
+bool ass[side][side];//用来记录一次演变后的细胞状态
+//更新一个格子的细胞状态
+int d_x[3] = { -1,0,1 };
+int d_y[3] = { -1,0,1 };
+bool update(int x, int y) {
+	int sum = 0;//这里包括自己在内的9个格子
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++)
+		{
+			int dx = (x + d_x[i]);
+			int dy = (y + d_y[j]);//遍历每一个周边的格子
+			if (field[dx][dy]) {
+				sum += 1;
+			}
+		}
+	}
+	if (field[x][y]==true) {
+		if (sum < 3 || sum>4) { return false; }
+		else { return true; }
+	}
+	else { if (sum == 3 ) { return  true; } else { return false; }
+	}
+}
+//绘制地图
+void drawmap() {
+	setfillcolor(BLACK);
+	for (int i = 0; i < side; i++) {
+		for (int j = 0; j < side; j++) {
+			if (field[i][j]) { fillrectangle(i * cube_size, j * cube_size, (i + 1) * cube_size, (j + 1) * cube_size); }
+			else { clearrectangle(i * cube_size + 1, j * cube_size + 1, (i+1) * cube_size - 1, (j+1) * cube_size - 1); }
+		//clear会连着边界绿线一起清理掉，故把边界向内缩一个像素
+		}
+	}
+}
+void evolve() {
+	for (int i = 0; i < side; i++) {
+		for (int j = 0; j < side; j++) {
+			ass[i][j] = update(i, j);
+		}
+	}
+	for (int i = 0; i < side; i++) {
+		for (int j = 0; j < side; j++) {
+			field[i][j] = ass[i][j];
+		}
+	}
+}
+//循环不断获取鼠标信息并根据鼠标信息设置map
+void getAndSet(bool(&field)[side][side]) {
+	MOUSEMSG msg;
+	while (is_continue) {
+		//获取鼠标信息
+		msg = GetMouseMsg();
+		//根据鼠标信息设置map
+		if (msg.mkLButton) {//鼠标左键按下 设置为存活
+			if ((side - 1) == (msg.y / cube_size) &&
+				(side - 1) == (msg.x / cube_size)) {//点击右下角那个点
+				is_continue = false;
+				//mciSendString("open 音乐名.MP3",NULL,NULL,NULL);
+			//mciSendString("play 音乐名.mp3",NULL,NULL,NULL);
+			}
+			field[msg.x / cube_size][msg.y / cube_size] = true;
+		}
+		else if (msg.mkRButton) {//鼠标右键点击，设置为不存活
+			field[msg.x / cube_size][msg.y / cube_size] = false;
+
+		}
+		drawmap();
+	}
+}
+int main(){
+	is_running = true;
+	is_continue = true;
+	initgraph(cube_size*side, cube_size*side);
+	setbkcolor(WHITE);
+	setlinecolor(GREEN);
+	cleardevice();
+	//获取窗口句柄
+	HWND a = GetHWnd();
+	//设置窗口标题
+	SetWindowText(a, "生命游戏");
+	//弹出窗口，提示选择速度
+	int isok = MessageBox(a, "请选择演化速度", "生命游戏", MB_OKCANCEL);
+	if (isok == IDOK) {
+		cout << "你点击了OK\n" << endl;
+	}
+	else if (isok == IDCANCEL) {
+		cout << "你点击了CANCEL" << endl;
+	}
+	field[side][side] = false;
+	for (int i = 0; i < side; i++) {
+		line(i * cube_size, 0, i * cube_size, side * cube_size);
+		line(0, i * cube_size, side * cube_size, i * cube_size);
+	}
+	while (is_running) {
+		//绘图部分
+		Sleep(200);
+		drawmap();
+		//键鼠部分
+		getAndSet(field);
+		//演化
+		evolve();
+	}
+	//while (1) { evolve(); }
+	getchar();
+	return 0;
+}

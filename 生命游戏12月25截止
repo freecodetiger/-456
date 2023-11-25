@@ -4,9 +4,9 @@
 #define cube_size 20
 #define side 40
 #include<mmsystem.h>
-#pragma comment(lib,"winmm.lib")
+#pragma comment(lib,"winmm.lib")j'h'j'h'j'h
 using namespace std;
-bool is_running;
+bool is_running;jhjhjh
 bool is_continue;
 bool field[side][side];
 bool ass[side][side];//用来记录一次演变后的细胞状态

@@ -1,8 +1,11 @@
 #include<iostream>
+//Easy X
 #include<graphics.h>
-//EasyX 
+//这个库用来获取键盘
+#include <conio.h>
 #define cube_size 20
 #define side 40
+//媒体播放
 #include<mmsystem.h>
 #pragma comment(lib,"winmm.lib")
 using namespace std;
@@ -64,7 +67,7 @@ void getAndSet(bool(&field)[side][side]) {
 		//根据鼠标信息设置map
 		if (msg.mkLButton) {//鼠标左键按下 设置为存活
 			//输出每一次鼠标点击的坐标
-			cout<<"x="<<msg.x/cube_size<<"y="<<msg.y/cube_size<<endl;
+			cout<<"\t x="<<msg.x/cube_size<<"\t y="<<msg.y/cube_size<<endl;
 			if ((side - 1) == (msg.y / cube_size) &&
 				(side - 1) == (msg.x / cube_size)) {//点击右下角那个点开始演化
 				is_continue = false;
@@ -88,18 +91,6 @@ int main(){
 	setbkcolor(WHITE);
 	setlinecolor(GREEN);
 	cleardevice();
-	//获取窗口句柄
-	HWND a = GetHWnd();
-	//设置窗口标题
-	SetWindowText(a, "生命游戏");
-	//弹出窗口，提示选择速度
-	int isok = MessageBox(a, "请选择演化速度", "生命游戏", MB_OKCANCEL);
-	if (isok == IDOK) {
-		cout << "你点击了OK\n" << endl;
-	}
-	else if (isok == IDCANCEL) {
-		cout << "你点击了CANCEL" << endl;
-	}
 	field[side][side] = false;
 	for (int i = 0; i < side; i++) {
 		line(i * cube_size, 0, i * cube_size, side * cube_size);
@@ -113,6 +104,15 @@ int main(){
 		getAndSet(field);
 		//演化
 		evolve();
+//按Q/q键可以退出程序（表现为暂停演化）
+if (_kbhit()) {
+	char ch = _getch();
+	if (ch == 'Q' || ch == 'q') {
+		is_running = false;
+		//关闭音乐
+		mciSendString("close canno.mp3", NULL, NULL, NULL);
+	}
+}
 	}
 	getchar();
 	return 0;

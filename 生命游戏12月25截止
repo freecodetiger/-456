@@ -3,6 +3,15 @@
 #include<graphics.h>
 //这个库用来获取键盘
 #include <conio.h>
+//这个库用来实现多线程
+#include<thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
+std:: thread getAndSetThread;
+std::mutex field_mutex;
+std::condition_variable cv;
+std::atomic_bool is_continue(true);
 #define cube_size 20
 #define side 40
 //媒体播放
@@ -10,7 +19,7 @@
 #pragma comment(lib,"winmm.lib")
 using namespace std;
 bool is_running;
-bool is_continue;
+//bool is_continue;
 bool field[side][side];
 bool ass[side][side];//用来记录一次演变后的细胞状态
 //更新一个格子的细胞状态
@@ -81,29 +90,43 @@ void getAndSet(bool(&field)[side][side]) {
 			field[msg.x / cube_size][msg.y / cube_size] = false;
 
 		}
-		drawmap();
+//这里注释掉drawmap函数是因为在主循环中不断画图已经足够，再增加这个就只会徒增功耗
+		//drawmap();
 	}
 }
-int main(){
+//封装一个函数，用来初始化界面
+void initgame() {
 	is_running = true;
 	is_continue = true;
-	initgraph(cube_size*side, cube_size*side);
+	initgraph(cube_size * side, cube_size * side);
 	setbkcolor(WHITE);
 	setlinecolor(GREEN);
 	cleardevice();
 	field[side][side] = false;
+	ass[side][side] = false;
 	for (int i = 0; i < side; i++) {
 		line(i * cube_size, 0, i * cube_size, side * cube_size);
 		line(0, i * cube_size, side * cube_size, i * cube_size);
 	}
+}
+int main(){
+		initagme();
+//启动一个新的线程
+		getAndSetThread = std::thread(getAndSet, std::ref(field));
+		BeginBatchDraw();
+	//主循环
 	while (is_running) {
 		//绘图部分
 		Sleep(200);
 		drawmap();
 		//键鼠部分
-		getAndSet(field);
+		//getAndSet(field);
 		//演化
 		evolve();
+//双缓冲，提高帧率
+		FlushBatchDraw();
+//多线程
+		cv.notify_one();
 //按Q/q键可以退出程序（表现为暂停演化）
 if (_kbhit()) {
 	char ch = _getch();
@@ -114,6 +137,10 @@ if (_kbhit()) {
 	}
 }
 	}
+//并行函数getAndSet
+getAndSet(field);
+getAndSetThread.join();
+EndBatchDraw();
 	getchar();
 	return 0;
 }

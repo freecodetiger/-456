@@ -1,3 +1,4 @@
+//项目—>属性->高级->使用多字节字符集
 #include<iostream>
 //Easy X
 #include<graphics.h>
@@ -8,6 +9,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+//定义一个SPEED来由用户决定演变速度
+int SPEED;
 std:: thread getAndSetThread;
 std::mutex field_mutex;
 std::condition_variable cv;
@@ -19,7 +22,7 @@ std::atomic_bool is_continue(true);
 #pragma comment(lib,"winmm.lib")
 using namespace std;
 bool is_running;
-//bool is_continue;
+bool is_begin;
 bool field[side][side];
 bool ass[side][side];//用来记录一次演变后的细胞状态
 //更新一个格子的细胞状态
@@ -55,7 +58,9 @@ void drawmap() {
 		}
 	}
 }
+//演化函数
 void evolve() {
+//遍历每一个格子，根据每个格子周围的状态决定接下来细胞的状态是死是活
 	for (int i = 0; i < side; i++) {
 		for (int j = 0; j < side; j++) {
 			ass[i][j] = update(i, j);
@@ -67,7 +72,7 @@ void evolve() {
 		}
 	}
 }
-//循环不断获取鼠标信息并根据鼠标信息设置map
+//（演变过程中）循环不断获取鼠标信息并根据鼠标信息设置map
 void getAndSet(bool(&field)[side][side]) {
 	MOUSEMSG msg;
 	while (is_continue) {
@@ -77,47 +82,76 @@ void getAndSet(bool(&field)[side][side]) {
 		if (msg.mkLButton) {//鼠标左键按下 设置为存活
 			//输出每一次鼠标点击的坐标
 			cout<<"\t x="<<msg.x/cube_size<<"\t y="<<msg.y/cube_size<<endl;
-			if ((side - 1) == (msg.y / cube_size) &&
-				(side - 1) == (msg.x / cube_size)) {//点击右下角那个点开始演化
-				is_continue = false;
-			//播放背景音乐，这里我选择卡农	
-			mciSendString("open canno.MP3",NULL,NULL,NULL);
-			mciSendString("play canno.mp3",NULL,NULL,NULL);
-			}
+			field[msg.x / cube_size][msg.y / cube_size] = true;
+		}		
+		else if (msg.mkRButton) {//鼠标右键点击，设置为不存活
+			field[msg.x / cube_size][msg.y / cube_size] = false;
+		}
+//这里注释掉drawmap函数是因为在主循环中不断画图已经足够，再增加这个就只会徒增功耗
+		//drawmap();
+	}
+}
+//定义一个新的函数，用来初始化活细胞并开始演变
+void newgetAndSet(bool(&field)[side][side]) {
+	MOUSEMSG msg;
+	msg = GetMouseMsg();
+	//根据鼠标信息设置map
+	if (msg.mkLButton) {//鼠标左键按下 设置为存活
+		//输出每一次鼠标点击的坐标
+		cout << "\t x=" << msg.x / cube_size << "\t y=" << msg.y / cube_size << endl;
+		if ((side - 1) == (msg.y / cube_size) &&
+			(side - 1) == (msg.x / cube_size)) {//点击右下角那个点开始演化
+			is_begin = false;
+			is_running = true;
+//播放音乐：卡农（音乐文件已经放在根目录里面了）
+			mciSendString("open canno.MP3", NULL, NULL, NULL);
+			mciSendString("play canno.mp3", NULL, NULL, NULL);
+		}
 			field[msg.x / cube_size][msg.y / cube_size] = true;
 		}
 		else if (msg.mkRButton) {//鼠标右键点击，设置为不存活
 			field[msg.x / cube_size][msg.y / cube_size] = false;
 
 		}
-//这里注释掉drawmap函数是因为在主循环中不断画图已经足够，再增加这个就只会徒增功耗
-		//drawmap();
 	}
-}
-//封装一个函数，用来初始化界面
-void initgame() {
-	is_running = true;
-	is_continue = true;
-	initgraph(cube_size * side, cube_size * side);
-	setbkcolor(WHITE);
-	setlinecolor(GREEN);
-	cleardevice();
-	field[side][side] = false;
-	ass[side][side] = false;
-	for (int i = 0; i < side; i++) {
-		line(i * cube_size, 0, i * cube_size, side * cube_size);
-		line(0, i * cube_size, side * cube_size, i * cube_size);
-	}
-}
 int main(){
-		initagme();
+//初始化
+is_running = false;
+is_continue = true;
+is_begin = true;
+initgraph(cube_size * side, cube_size * side);
+setbkcolor(WHITE);
+setlinecolor(GREEN);
+cleardevice();
+field[side][side] = false;
+ass[side][side] = false;
+for (int i = 0; i < side; i++) {
+	line(i * cube_size, 0, i * cube_size, side * cube_size);
+	line(0, i * cube_size, side * cube_size, i * cube_size);
+}
+cout<<"生命游戏，首先选择演变速度，用鼠标左键设置活细胞，右键设置细胞为死细胞"<<endl;
+cout<<"鼠标左键点击最右下角的细胞开始演化"<<endl;
+cout << "请选择演变速度：" << endl;
+cout << "输入1、2、3表示低速、中速和高速" << endl;
+int x;
+cin >> x;
+switch (x) {
+case 1:SPEED = 500; break;
+case 2:SPEED = 100; break;
+case 3:SPEED = 20; break;
+}
+//开始游戏之前的设置初始化活细胞环节
+while (is_begin) {
+	drawmap();
+	newgetAndSet(field);
+}
 //启动一个新的线程
 		getAndSetThread = std::thread(getAndSet, std::ref(field));
 		BeginBatchDraw();
 	//主循环
 	while (is_running) {
 		//绘图部分
-		Sleep(200);
+		Sleep(SPEED);
 		drawmap();
 		//键鼠部分
 		//getAndSet(field);
@@ -134,6 +168,7 @@ if (_kbhit()) {
 		is_running = false;
 		//关闭音乐
 		mciSendString("close canno.mp3", NULL, NULL, NULL);
+		closegraph();
 	}
 }
 	}
@@ -141,6 +176,8 @@ if (_kbhit()) {
 getAndSet(field);
 getAndSetThread.join();
 EndBatchDraw();
+closegraph();
+//防止闪退
 	getchar();
 	return 0;
 }

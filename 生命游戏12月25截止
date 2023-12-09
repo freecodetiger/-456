@@ -6,7 +6,7 @@
 #include<mmsystem.h>
 #pragma comment(lib,"winmm.lib")
 using namespace std;
-bool is_running;jhjhjh
+bool is_running;
 bool is_continue;
 bool field[side][side];
 bool ass[side][side];//用来记录一次演变后的细胞状态
@@ -63,11 +63,14 @@ void getAndSet(bool(&field)[side][side]) {
 		msg = GetMouseMsg();
 		//根据鼠标信息设置map
 		if (msg.mkLButton) {//鼠标左键按下 设置为存活
+			//输出每一次鼠标点击的坐标
+			cout<<"x="<<msg.x/cube_size<<"y="<<msg.y/cube_size<<endl;
 			if ((side - 1) == (msg.y / cube_size) &&
-				(side - 1) == (msg.x / cube_size)) {//点击右下角那个点
+				(side - 1) == (msg.x / cube_size)) {//点击右下角那个点开始演化
 				is_continue = false;
-				//mciSendString("open 音乐名.MP3",NULL,NULL,NULL);
-			//mciSendString("play 音乐名.mp3",NULL,NULL,NULL);
+			//播放背景音乐，这里我选择卡农	
+			mciSendString("open canno.MP3",NULL,NULL,NULL);
+			mciSendString("play canno.mp3",NULL,NULL,NULL);
 			}
 			field[msg.x / cube_size][msg.y / cube_size] = true;
 		}
@@ -111,7 +114,6 @@ int main(){
 		//演化
 		evolve();
 	}
-	//while (1) { evolve(); }
 	getchar();
 	return 0;
 }

@@ -136,7 +136,7 @@ cout << "输入1、2、3表示低速、中速和高速" << endl;
 int x;
 cin >> x;
 switch (x) {
-case 1:SPEED = 500; break;
+case 1:SPEED = 460; break;
 case 2:SPEED = 100; break;
 case 3:SPEED = 20; break;
 }
@@ -165,10 +165,11 @@ while (is_begin) {
 if (_kbhit()) {
 	char ch = _getch();
 	if (ch == 'Q' || ch == 'q') {
-		is_running = false;
+		
 		//关闭音乐
 		mciSendString("close canno.mp3", NULL, NULL, NULL);
 		closegraph();
+		is_running = false;
 	}
 }
 	}

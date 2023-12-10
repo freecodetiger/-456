@@ -131,14 +131,18 @@ for (int i = 0; i < side; i++) {
 }
 cout<<"生命游戏，首先选择演变速度，用鼠标左键设置活细胞，右键设置细胞为死细胞"<<endl;
 cout<<"鼠标左键点击最右下角的细胞开始演化"<<endl;
+cout<<"演化过程中也可以用鼠标设置细胞状态"<<endl;
 cout << "请选择演变速度：" << endl;
 cout << "输入1、2、3表示低速、中速和高速" << endl;
 int x;
 cin >> x;
 switch (x) {
-case 1:SPEED = 460; break;
-case 2:SPEED = 100; break;
-case 3:SPEED = 20; break;
+case 1:SPEED = 460;
+cout<<"你选择了低速，可以开始设置细胞初始状态了"<<endl;break;
+case 2:SPEED = 100;
+cout<<"你选择了中速，可以开始设置细胞初始状态了"<<endl;break;
+case 3:SPEED = 20; 
+cout<<"你选择了高速，可以开始设置细胞初始状态了"<<endl;break;
 }
 //开始游戏之前的设置初始化活细胞环节
 while (is_begin) {

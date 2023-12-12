@@ -1,253 +1,278 @@
 #include<stdio.h>
-#include<stdlib.h>
+#include<graphics.h>
 #include<time.h>
-#include<graphics.h>	//图形库
-#include<mmsystem.h>
-#include<iostream>
-using namespace std;
-#pragma comment(lib,"winmm.lib")
-#define SIZE 40	//图片的尺寸
-int ROWL=10;
-int COLS=10;
-int minenum=10;
-//加载资源
-IMAGE  imgs[12];
-void loadImgs()
+/**************全局变量**************/
+int map_row, map_col;	//地图大小
+int times;	//翻开的此时
+int mine;	//雷的数量
+int isfail;	//判断是否失败
+int pass;	//雷的数量达到10% 就扩大游戏区域
+HWND hWnd;	//当前窗口
+int map[30][30] = { 0 };	//地图	用map_row map_col控制地图大小
+IMAGE imgs[14];	//图片
+/**************全局函数**************/
+void init();
+void DrawMap();
+void initmap();	//赢了之后初始化游戏数据 更新地图
+void Play();
+void Judg();
+void Empty(int row,int col);
+
+int main()
 {
-	for (int i = 0; i < 12; i++)
+	init();
+	DrawMap();
+	while (1)
 	{
-		char buf[50] = { 0 };
-		sprintf_s(buf, "./images/%d.jpg", i);
-		loadimage(imgs + i, buf, SIZE, SIZE);
+		Play();
+		Judg();
 	}
+	getchar();
+	closegraph();
+	return 0;
 }
 
-
-
-/*定义一个地图*/
-struct Map
+void init()
 {
-	int** arr;	//二维数组指针
-	int rows;	//行数
-	int cols;	//列数
-};
-void map_recOpen(Map* map, int row, int col);
-//初始化Map
-void map_init(Map* map, int rows, int cols)
-{
-	map->rows = rows;
-	map->cols = cols;
-	map->arr = (int**)calloc(map->rows, sizeof(int*));
-	if (!map->arr)
-	{
-		printf("内存申请失败\n");
-		return;
-	}
-	for (int i = 0; i < map->rows; i++)
-	{
-		map->arr[i] = (int*)calloc(map->cols, sizeof(int));
-		if (!map->arr[i])
-		{
-			printf("内存申请失败");
-			return;
-		}
-	}
+	srand((unsigned)time(NULL));
+	map_row = 10;	//地图行
+	map_col = 10;	//地图列
+	isfail = 0;
+	pass = 0;		
+	//加载图片
+	loadimage(&imgs[0], L"素材/0.bmp", 25, 25);
+	loadimage(&imgs[1], L"素材/1.bmp", 25, 25);
+	loadimage(&imgs[2], L"素材/2.bmp", 25, 25);
+	loadimage(&imgs[3], L"素材/3.bmp", 25, 25);
+	loadimage(&imgs[4], L"素材/4.bmp", 25, 25);
+	loadimage(&imgs[5], L"素材/5.bmp", 25, 25);
+	loadimage(&imgs[6], L"素材/6.bmp", 25, 25);
+	loadimage(&imgs[7], L"素材/7.bmp", 25, 25);
+	loadimage(&imgs[8], L"素材/8.bmp", 25, 25);
+	loadimage(&imgs[9], L"素材/标记.bmp", 25, 25);
+	loadimage(&imgs[10], L"素材/空.bmp", 25, 25);
+	loadimage(&imgs[11], L"素材/雷0.bmp", 25, 25);
+	loadimage(&imgs[12], L"素材/雷1.bmp", 25, 25);
+	loadimage(&imgs[13], L"素材/雷2.bmp", 25, 25);
+
+	initmap();
 }
-//输出一下所有的数据（控制台）
-void map_show(Map* map)
-{
-	for (int i = 0; i < map->rows; i++)
-	{
-		for (int k = 0; k < map->cols; k++)
-		{
-			printf("%2d ", map->arr[i][k]);
-		}
-		printf("\n");
-	}
-}
-//设置雷 -1,num 表示雷的数量
-void map_setMine(Map* map, int num)
-{
-	//设置随机数种子
-	srand(time(NULL));
-	for (int i = 0; i < num; )
-	{
-		//随机产生下标	[0~10)
-		int r = rand() % map->rows;
-		int c = rand() % map->cols;
-		if (map->arr[r][c] == 0)
-		{
-			//把指定的位置的值变为-1
-			map->arr[r][c] = -1;
-			i++;	//只有成功设置了雷，才自增
-		}
-	}
 
-	//把以雷为中心的九宫格的数字都+1(雷除外)
-	for (int i = 0; i < map->rows; i++)
+void DrawMap()
+{
+	BeginBatchDraw();
+	for (int y = 1; y <= map_row; y++)
 	{
-		for (int k = 0; k < map->cols; k++)
+		for (int x = 1; x <= map_col; x++)
 		{
-			if (map->arr[i][k] == -1)
+			if (map[y][x] > 18)
 			{
-				//遍历以雷为中心的九宫格
-				for (int r = i - 1; r <= i + 1; r++)
+				//标记部分额外处理
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[9]);
+				continue;
+			}
+			switch (map[y][x])
+			{
+			//制作初期可以加上下面代码看看雷放到了哪里
+			//case -1:	//雷
+			//	putimage(x * 25, y * 25, &imgs[12]);
+			//	break;
+			case 9:		// -1 + 10 = 9 踩到雷了
+				putimage((x - 1) *25, (y - 1) *25, &imgs[13]);
+				isfail = 1;
+				break;
+			case 10:	//空白
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[0]);
+				break;
+			case 11:	//有一个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[1]);
+				break;
+			case 12:	//有两个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[2]);
+				break;
+			case 13:	//有三个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[3]);
+				break;
+			case 14:	//有四个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[4]);
+				break;
+			case 15:	//有五个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[5]);
+				break;
+			case 16:	//有六个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[6]);
+				break;
+			case 17:	//有七个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[7]);
+				break;
+			case 18:	//有八个雷
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[8]);
+				break;
+			default:
+				putimage((x - 1) * 25, (y - 1) * 25, &imgs[10]);
+				break;
+			}
+		}
+	}
+	EndBatchDraw();
+}
+
+void initmap()
+{
+	ZeroMemory(map, sizeof(int) * 30 * 30);		//初始化地图为0
+	times = 0;	//翻开次数
+	mine += 5;	//雷的数量 + 5
+	float x = mine / (float)(map_row * map_col);
+	if ( x > 0.15)
+	{
+		//当雷的数量达到10%时扩大游戏区域	先横向扩大5个后纵向扩大5个
+		if (pass++ % 2)		//使 pass 在 0 和 1之间变换		首先是0 ，然后0 1 之间循环
+		{
+			map_row += 5;	//纵向扩大5个区域
+		}
+		else
+		{
+			map_col += 5;	//横向扩大5个区域
+		}
+	}
+
+	hWnd = initgraph(map_col * 25, map_row * 25);		//初始化地图大小
+
+	int mine_r, mine_c;
+	for (int i = 0; i < mine;)
+	{
+		mine_r = rand() % map_row + 1;	//mine_r 1 ~ 8
+		mine_c = rand() % map_col + 1;
+		if (map[mine_r][mine_c] == 0)
+		{
+			map[mine_r][mine_c] = -1;	//在数组中放雷
+			i++;						//放入雷后雷的数量加一
+		}
+	}
+	//给雷附近的数加一
+	for (int i = 1; i <= map_row; i++)
+	{
+		for (int j = 1; j <= map_col; j++)
+		{
+			if (map[i][j] != -1)
+			{
+				//检查周围雷的个数
+				for (int m = i - 1; m <= i + 1; m++)
 				{
-					for (int c = k - 1; c <= k + 1; c++)
+					for (int n = j - 1; n <= j + 1; n++)
 					{
-						//排除掉雷
-						if ((r >= 0 && r < map->rows && c >= 0 && c < map->cols)
-							&& map->arr[r][c] != -1)
-						{
-							map->arr[r][c] += 1;
+						if (map[m][n] == -1) {	//附近有雷，数字加一
+							map[i][j]++;
 						}
 					}
 				}
 			}
 		}
 	}
+
+	wchar_t arr[20];
+	wsprintf(arr, L"扫雷 雷:%d", mine);
+	SetWindowText(hWnd, arr);
 }
-//绘制界面(图形窗口上)
-void map_draw(Map* map)
+
+void Play()
 {
-	for (int i = 0; i < map->rows; i++)
+	MOUSEMSG msg;//鼠标消息
+	int row, col;//鼠标点击的行和列
+	msg = GetMouseMsg();
+	row = msg.y / 25 + 1;
+	col = msg.x / 25 + 1;
+	switch (msg.uMsg)
 	{
-		for (int k = 0; k < map->cols; k++)
+	case WM_LBUTTONDOWN://左键按下
+		if (map[row][col] >= 9)//翻开过的 和标记的 不进行操作
 		{
-			//求每个格子左上角的坐标
-			int x = k * SIZE;
-			int y = i * SIZE;
-			//判断是不是数字[0~8)
-			if (map->arr[i][k] >= 0 && map->arr[i][k] <= 8)
-			{
-				putimage(x, y, imgs + map->arr[i][k]);
-			}
-			//如果是雷
-			else if (map->arr[i][k] == -1)
-			{
-				putimage(x, y, imgs + 9);
-			}
-			//加密之后，最小的数字是多少 19 最大的是多少28
-			else if (map->arr[i][k] >= 19 && map->arr[i][k] <= 28)
-			{
-				putimage(x, y, imgs + 10);
-			}
-			//如果是被标记，则贴图为小红旗
-			else if (map->arr[i][k] >= 39)
-			{
-				putimage(x, y, imgs + 11);
-			}
+			break;
 		}
-	}
-}
-void allsweep(Map *map) {
-	for (int i = 0; i < ROWL; i++) {
-		for (int j = 0; j < COLS; j++) {
-			map->arr[i][j] -= 20;
-			map_draw(map);
-		}
-	}
-}
-//把每个格子盖起来
-void map_cover(Map* map)
-{
-	//让现在数组里面的数据变得不一样-1 0~8
-	for (int i = 0; i < map->rows; i++)
-	{
-		for (int k = 0; k < map->rows; k++)
+		if (map[row][col] == 0)//翻开 0项 和 周围的图片
 		{
-			map->arr[i][k] += 20;
+			Empty(row,col);
+		}
+		else//翻开点击的图片
+		{
+			map[row][col] += 10;//翻开
+			times++;	//翻开次数 +1
+		}
+		break;
+	case WM_RBUTTONDOWN://右键按下 WM_RBUTTONDOWN
+		if (map[row][col] >= 9 && map[row][col]<19)//翻开的不进行操作
+		{
+			break;
+		}
+		if (map[row][col] >= 19)//标记的取消标记
+		{
+			map[row][col] -= 20;
+		}
+		else//没有翻开的加20
+		{
+			map[row][col] += 20;	//20是随意的数字，只要足够大就行
+		}
+		break;
+	}
+	DrawMap();
+}
+
+void Judg()
+{
+	//先查找是否点开了雷
+	if (isfail)
+	{
+		if (MessageBox(GetHWnd(), L"你踩到雷了,是否重新开始本关", L"失败", MB_YESNO) == IDYES)		//GetHWnd()是获取一个顶置窗口
+		{
+			mine -= 5;
+			isfail = 0;
+			initmap();
+			DrawMap();	//渲染地图
+		}
+		else
+		{
+			_exit(0);
 		}
 	}
-}
-//点几格子，然后打开
-void map_mouseMsg(Map* map, ExMessage* msg)
-{
-	//根据鼠标坐标，获得点击的格子的下标
-	int r = msg->y / SIZE;
-	int c = msg->x / SIZE;
-	//如果是鼠标左键点击，就打开格子
-	if (msg->message == WM_LBUTTONDOWN && map->arr[r][c] >= 19 && map->arr[r][c])
-	{
-		PlaySound("./images/click.wav", NULL, SND_ASYNC | SND_FILENAME);
-		map->arr[r][c] -= 20;
-		if (map->arr[r][c] = -1) { allsweep(map); return; }
-		map_recOpen(map, r, c);
-		system("cls");
-		map_show(map);
-	}
-	else if (msg->message == WM_RBUTTONDOWN && map->arr[r][c] >= 19 && map->arr[r][c] <= 28)
-	{
-		PlaySound("./images/click.wav", NULL, SND_ASYNC | SND_FILENAME);
-		map->arr[r][c] += 20;
-		map_show(map);
-		system("cls");
-	}
-}
-//如果点到空白格子，就递归打开周围的所有的空白格子和数字格子
-void map_recOpen(Map* map, int row, int col)
-{
-	//先判断一下row col位置是不是空白格子
-	if (map->arr[row][col] != 0)
-		return;
 
-	//遍历以这个空白格子为中心的九宫格
-	for (int r = row - 1; r <= row + 1; r++)
+	if (times == map_row * map_col - mine)	//所有点 - 雷 = 非雷区
 	{
-		for (int c = col - 1; c <= col + 1; c++)
+		if (MessageBox(GetHWnd(), L"是否进入下一关", L"成功", MB_YESNO) == IDYES) {
+			closegraph();
+			//重新开始游戏
+			initmap();
+			DrawMap();	//渲染地图
+		}
+		else
+			_exit(0);
+	}
+}
+
+void Empty(int row, int col)
+{
+	//递归实现以 0 为 九宫格的区域 自动翻开
+	map[row][col] += 10;	//翻开当前位置
+	times++;				//翻开次数+1
+	for (int i = row - 1; i <= row + 1; i++)
+	{
+		for (int j = col - 1; j <= col + 1; j++)
 		{
-			//排除掉雷
-			if ((r >= 0 && r < map->rows && c >= 0 && c < map->cols)
-				&& map->arr[r][c] >= 19 && map->arr[r][c] <= 28)
+			//外圈空白区域不操作	仅对可以看到的区域进行递归调用
+			if (i >= 1 && i <= map_row && j >= 1 && j <= map_col)
 			{
-				map->arr[r][c] -= 20;
-				map_recOpen(map, r, c);	//递归
+				if (map[i][j] < 9)			//小于9 是未操作，未翻开的区域
+				{
+					if (map[i][j] == 0)		//0的周围九宫格内无雷，翻开
+					{
+						Empty(i, j);
+					}
+					else
+					{
+						map[i][j] += 10;	//有雷的不翻，让玩家思考是否需要翻开
+						times++;
+					}
+				}
 			}
 		}
 	}
-}
-
-int main()
-{
-	//ROWL = 0;
-	//COLS = 0;
-	//int m = 0;
-	//cout << "欢迎进入扫雷，你可以选择游戏难度：" << endl;
-	//cout << "输入1为简单模式（10*10），有10个雷" << endl;
-	//cout << "输入2为中等模式（30*20），有60个雷" << endl;
-	//cout << "输入3为专家模式" << endl;
-	//cin >> m;
-	//switch (m) {
-	//case 1:ROWL = 10, COLS = 10; minenum = 10;
-	//case 2:ROWL = 30, COLS = 20; minenum = 60;
-	////case 3:ROWL = 10, COLS = 10; minenum = 10;
-	//}
-
-	//创建图形窗口
-	initgraph(ROWL*SIZE, COLS*SIZE, EW_SHOWCONSOLE);
-
-	//播放背景音乐
-	mciSendString("open ./images/start.mp3 alias bgm", NULL, 0, NULL);
-	mciSendString("play bgm", NULL, 0, NULL);
-
-	loadImgs();
-
-	Map map;
-	map_init(&map, ROWL, COLS);
-	map_setMine(&map, minenum);
-	map_cover(&map);
-	//消息循环
-	while (true)
-	{
-		ExMessage msg = { 0 };
-		while (peekmessage(&msg, EM_MOUSE))
-		{
-			map_mouseMsg(&map, &msg);
-		}
-
-		map_draw(&map);
-	}
-
-	getchar();
-	return 0;
 }

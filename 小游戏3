@@ -1,3 +1,4 @@
+//本游戏还有贴图素材，字符集需要统一使用多字节字符集（这里使用的是宽字符集）
 #include<stdio.h>
 #include<graphics.h>
 #include<time.h>

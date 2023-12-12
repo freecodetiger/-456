@@ -172,8 +172,11 @@ if (_kbhit()) {
 		
 		//关闭音乐
 		mciSendString("close canno.mp3", NULL, NULL, NULL);
+		MessageBox(GetHWnd(), "演变停止", "游戏结束", 0);
+		cleardevice();
 		closegraph();
 		is_running = false;
+		return 0;
 	}
 }
 	}

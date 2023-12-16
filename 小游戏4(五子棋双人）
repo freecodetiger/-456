@@ -12,10 +12,12 @@ bool Juge();		//返回游戏结果	比赛结束返回1 仍比赛中返回0
 void Game_Juge();	//判断
 
 int flag;	// 1白棋 或 -1黑棋
+//COORD是一个结构体，有两个成员变量分别表示当前坐标X，Y
 COORD currentPos, waitPos;
 
 int main()
 {
+	//在周围额外开辟一圈用来存放标志
 	initgraph(420 + 60, 420 + 60, 0);
 	GameInit();
 	while (1)
@@ -44,7 +46,7 @@ void GameDraw()
 {
 	BeginBatchDraw();
 	/*******************		绘制棋盘			********************/
-	wchar_t arr[4];
+	char arr[20];
 	setbkcolor(WHITE);					//设置窗口背景颜色
 	setbkmode(1);						//设置文字背景透明
 	setlinestyle(PS_SOLID, 2);          //线样式设置
@@ -53,16 +55,17 @@ void GameDraw()
 	setfillcolor(RGB(255, 205, 150));   // 填充颜色设置
 	cleardevice();						//清屏
 	solidrectangle(0, 0, 480, 480);		//绘制无边框的正方形
-										//绘制行
+	//绘制行
 	for (int row = 1; row <= 15; row++)
 	{
+		//+64是为了使用大写字母的ASCII码
 		outtextxy(10, row * 30 - 15, 64 + row);
 		line(30, row * 30, 420 + 30, row * 30);
 	}
 	//绘制列
 	for (int col = 1; col <= 15; col++)
 	{
-		wsprintf(arr, L"%d", col);
+		wsprintf(arr, "%d", col);
 		outtextxy(col * 30 - 5, 5, arr);
 		line(col * 30, 30, col * 30, 420 + 30);
 	}
@@ -86,7 +89,7 @@ void GameDraw()
 			}
 			if (Map[y][x] == -1)
 			{
-				//绘制白子
+				//绘制黑子
 				setfillcolor(BLACK);   // 填充颜色设置
 				solidcircle((x + 1) * 30, (y + 1) * 30, 10);
 			}
@@ -126,6 +129,7 @@ void GameDraw()
 
 void GameUpdate()
 {
+	//鼠标操作
 	MOUSEMSG msg = GetMouseMsg(); // 获取鼠标信息
 	int x = msg.x;
 	int y = msg.y;
@@ -159,7 +163,7 @@ void GameUpdate()
 		break;	// 按鼠标右键退出程序
 	}
 }
-
+//Jude函数返回一个布尔值，true表示获胜
 bool Juge()
 {
 	int begin = 0, end = 0;
@@ -314,13 +318,13 @@ void Game_Juge()
 	{
 		if (Map[currentPos.Y][currentPos.X] == -1)
 		{
-			MessageBox(GetHWnd(), L"黑棋胜", L"比赛结束", 0);
+			MessageBox(GetHWnd(), "黑棋胜", "比赛结束", 0);
 			GameInit();
 			return;
 		}
 		if (Map[currentPos.Y][currentPos.X] == 1)
 		{
-			MessageBox(GetHWnd(), L"白棋胜", L"比赛结束", 0);
+			MessageBox(GetHWnd(), "白棋胜", "比赛结束", 0);
 			GameInit();
 			return;
 		}

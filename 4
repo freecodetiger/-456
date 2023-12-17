@@ -1,0 +1,63 @@
+#include <graphics.h>  // 引入EasyX图形库
+#include <conio.h>//引入getch函数
+double PI4 = 3.14159265358979323846; 
+void Screen4() {
+    initgraph(400, 400);  // 创建一个400x400的窗口，对应40x40的方格纸
+
+    // 绘制方格
+    for (int i = 0; i <= 400; i += 10) {
+        line(0, i, 400, i);  // 横线
+        line(i, 0, i, 400);  // 竖线
+    }
+
+    // 绘制笑脸
+
+    setfillcolor(0x0055AA);  // 设置填充颜色为黄色
+    setlinecolor(RED);   // 设置线条颜色为黑色
+    int x;
+    int y;
+    int xradius;
+    int yradius;
+
+    // 绘制圆脸
+    x = 50, y = 50, xradius = 350, yradius = 350;
+    fillellipse(x, y, xradius, yradius);
+
+    // 绘制眼睛
+    setfillcolor(RED);  // 设置填充颜色为白色
+    x = 75, y = 150, xradius = 175, yradius = 225;
+    fillrectangle(x, y, xradius, yradius);  // 左眼
+    x = 225, y = 150, xradius = 325, yradius = 225;
+    fillrectangle(x, y, xradius, yradius);  // 右眼
+    setlinecolor(BLACK);
+    setlinestyle(PS_SOLID, 10);
+
+    // 绘制瞳孔
+    setfillcolor(0x5555FF);
+    setlinecolor(0x5555FF);  // 设置线条颜色为红色
+    setlinestyle(PS_SOLID, 10);  // 设置线条样式为实线，粗细为5
+    int left = 100;
+    int right = 150;
+    int top = 100;
+    int bottom = 225;
+    double strangle = 4 * PI4 / 3;
+    double endangle = 5 * PI4 / 3;
+    solidpie(left, top, right, bottom, strangle, endangle); // 绘制扇形，表示瞳孔
+    left = 250;
+    right = 300;
+    solidpie(left, top, right, bottom, strangle, endangle);
+    // 绘制鼻子
+    setlinecolor(RED);  // 设置线条颜色为红色
+    setlinestyle(PS_SOLID, 10);  // 设置线条样式为实线，粗细为5
+    left = 140;
+    right = 210;
+    top = 175;
+    bottom = 280;
+    strangle = 200;
+    endangle = 359;
+    arc(left, top, right, bottom, strangle, endangle);  // 绘制弧线，表示鼻子
+    _getch();  // 等待用户按任意键退出S
+    closegraph();  // 关闭图形窗口
+    //return 0;
+}
+#pragma once

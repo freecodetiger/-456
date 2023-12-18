@@ -1,3 +1,4 @@
+#pragma once
 #include"stdio.h"
 #include"windows.h"
 #include"string.h"
@@ -226,7 +227,7 @@ void Gameover()
 	printf("└──────────┘");
 
 }
-int main()
+void play4()
 {
 	//隐藏光标
 	HideCursor();

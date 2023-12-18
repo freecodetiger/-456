@@ -1,0 +1,27 @@
+//项目->属性->使用多字节
+#include"LifeGame.h"
+#include"minesweep.h"
+#include "five.h"
+#include "game2048.h"
+#include "bird.h"
+#include "rock.h"
+#include "logo.h"
+int main() {
+	int x;
+	cout << "输入数字1进入生命游戏" << endl;
+	cout << "输入数字2进入扫雷" << endl;
+	cout << "输入数字3进入五子棋" << endl;
+	cout << "输入数字4进入2048" << endl;
+	cout << "输入数字5进入小鸟飞飞飞" << endl;
+	cout << "输入数字6进入猜拳" << endl;
+	cin >> x;
+	switch (x) {
+	case 1: logo(); play(); break;
+	case 2: logo2(); play1(); break;
+	case 3:logo3(); play2(); break;
+	case 4:logo4(); play3(); break;
+	case 5:logo5(); play4(); break;
+	case 6:logo6(); play5(); break;
+	default:cout << "输入的数字不在考虑范围内" << endl;
+	}
+}

@@ -1,13 +1,11 @@
+#pragma once
 #include<stdio.h>
 #include<conio.h>   //使用getch()函数 
 #include<time.h> 
 #include <stdlib.h>
 int num[4][4];
-//定义一个数组num，用于存储游戏中的数字
-int score, gameover, ifappear, gamew, gamef, move;
-//定义一个变量，用于存储玩家得分
+int score, gameover, ifappear, gamew, gamef, moves;
 char key;
-//定义一个变量，用于存储玩家输入的按键
 void explation()
 {
     void menu();
@@ -49,7 +47,7 @@ void gamefaile()
         printf("|\n");
         printf("\t\t\t---------------------\n\t\t\t");
     }
-    printf("你的成绩：%d,移动了%d步\n", score, move);
+    printf("你的成绩：%d,移动了%d步\n", score, moves);
     printf("请按任意键返回主菜单...\n");
     _getch();
     system("cls");
@@ -57,19 +55,14 @@ void gamefaile()
 }
 void gamewin()
 {
-    //定义变量i,j
     int i, j;
-    //清屏
     system("cls");
-    //打印标题
     printf("\t\t*****************************************\t\t\n");
     printf("\t\t*****************************************\n");
     printf("\t\t*******************you win***************\n");
     printf("\t\t*****************************************\n");
     printf("\t\t*****************************************\t\t\n");
-    //打印分割线
     printf("\t\t\t---------------------\n\t\t\t");
-    //打印表格
     for (j = 0; j < 4; j++)
     {
         for (i = 0; i < 4; i++)
@@ -80,13 +73,9 @@ void gamewin()
         printf("|\n");
         printf("\t\t\t---------------------\n\t\t\t");
     }
-    //打印分数和移动步数
-    printf("你的成绩：%d,移动了%d步\n", score, move);
-    //打印提示信息
+    printf("你的成绩：%d,移动了%d步\n", score, moves);
     printf("请按任意键返回主菜单...\n");
-    //等待按键
     _getch();
-    //清屏
     system("cls");
 }
 void prin()
@@ -98,10 +87,12 @@ void prin()
     printf("\t\t******************游戏开始***************\n");
     printf("\t\t*****************************************\n");
     printf("\t\t*****************************************\t\t\n");
-    printf("\t\t      请按方向键或W、A、S、D移动滑块\n");//输出操作提示语句
+    //输出操作提示语句
+    printf("\t\t      请按方向键或W、A、S、D移动滑块\n");
     printf("\t\t          按ESC返回至主菜单\n");
     printf("\t\t\t---------------------\n\t\t\t");
-    for (j = 0; j < 4; j++)                 //输出4*4的表格
+    //输出4*4的表格
+    for (j = 0; j < 4; j++)                 
     {
         for (i = 0; i < 4; i++)
             if (num[j][i] == 0)
@@ -111,34 +102,40 @@ void prin()
         printf("|\n");
         printf("\t\t\t---------------------\n\t\t\t");
     }
-    printf("你的成绩：%d，移动了%d步\n", score, move);//输出得分和移动步数
+    //输出得分和移动步数
+    printf("你的成绩：%d，移动了%d步\n", score, moves);
 }
 void appear()
 {
     int i, j, ran, t[16], x = 0, a, b;
-    srand((int)time(0));          //随机种子初始化
-    for (j = 0; j < 4; j++)      //将空白的区域的坐标保存到中间数组t中
+    //随机种子初始化
+    srand((int)time(0));       
+    //将空白的区域的坐标保存到中间数组t中
+    for (j = 0; j < 4; j++)      
         for (i = 0; i < 4; i++)
             if (num[j][i] == 0)
             {
                 t[x] = j * 10 + i;
                 x++;
             }
-    if (x == 1)            //在t中随机取一个坐标
+    //在t中随机取一个坐标
+    if (x == 1)            
         ran = x - 1;
     else
         ran = rand() % (x - 1);
-    a = t[ran] / 10;      //取出这个数值的十位数
-    b = t[ran] % 10;     //取出这个数值的个位数
+    //取出这个数值的十位数
+    a = t[ran] / 10;      
+    //取出这个数值的个位数
+    b = t[ran] % 10;     
     srand((int)time(0));
-    if ((rand() % 9) > 2)    //在此空白区域随机赋值2或4
+    //在此空白区域随机赋值2或4
+    if ((rand() % 9) > 2)    
         num[a][b] = 2;
     else
         num[a][b] = 4;
 }
 void close()
 {
-    // 关闭游戏
     exit(0);
 }
 void add(int* p)
@@ -147,46 +144,31 @@ void add(int* p)
     int i = 0, b;
     while (i < 3)
     {
-        //如果当前元素不为0
         if (*(p + i) != 0)
         {
-            //从当前元素的下一个元素开始，查找是否有与当前元素相等的元素
             for (b = i + 1; b < 4; b++)
             {
-                //如果找到相等的元素
                 if (*(p + b) != 0)
-                    //如果当前元素和相等元素相等
                     if (*(p + i) == *(p + b))
                     {
-                        //将两个元素相加
                         score = score + (*(p + i)) + (*(p + b));
-                        //将当前元素替换为相加后的结果
                         *(p + i) = *(p + i) + *(p + b);
-                        //如果当前元素等于2048，则游戏结束
                         if (*(p + i) == 2048)
                             gamew = 1;
-                        //将相等元素替换为0
                         *(p + b) = 0;
-                        //将i指向相等元素的下一个元素
                         i = b + i;
-                        //出现次数加1
                         ++ifappear;
-                        //跳出循环
                         break;
                     }
                     else
                     {
-                        //如果当前元素和相等元素不相等，则将i指向相等元素
                         i = b;
-                        //跳出循环
                         break;
                     }
             }
-            //如果遍历完所有的元素，没有找到相等的元素，则i加1
             if (b == 4)
                 i++;
         }
-        //如果当前元素为0，则i加1
         else
             i++;
     }
@@ -195,26 +177,19 @@ void add(int* p)
 void Gameplay()
 {
     int i, j, g, e, a, b[4];
-    // 显示两个随机数
     appear();
     appear();
-    // 循环游戏
     while (1)
     {
-        // 如果随机数出现，则显示一个随机数
         if (ifappear != 0)
             appear();
-        // 显示游戏板
         prin();
-        // 获取按键
         key = _getch();
-        // 根据按键进行操作
         switch (key)
         {
         case 'w':
         case 'W':
         case 72:
-            // 向上移动
             ifappear = 0;
             for (j = 0; j < 4; j++)
             {
@@ -237,12 +212,11 @@ void Gameplay()
                 }
             }
             if (ifappear != 0)
-                ++move;
+                ++moves;
             break;
         case 's':
         case 'S':
         case 80:
-            // 向下移动
             ifappear = 0;
             for (j = 0; j < 4; j++)
             {
@@ -258,7 +232,6 @@ void Gameplay()
                     if (b[g] != 0)
                     {
                         num[e][j] = b[g];
-                        num[j][e] = b[g];
                         if (g != e)
                             ++ifappear;
                         e--;
@@ -266,12 +239,11 @@ void Gameplay()
                 }
             }
             if (ifappear != 0)
-                ++move;
+                ++moves;
             break;
         case 'a':
         case 'A':
         case  75:
-            // 向左移动
             ifappear = 0;
             for (j = 0; j < 4; j++)
             {
@@ -294,12 +266,11 @@ void Gameplay()
                 }
             }
             if (ifappear != 0)
-                ++move;
+                ++moves;
             break;
         case 'd':
         case 'D':
         case  77:
-            // 向右移动
             ifappear = 0;
             for (j = 0; j < 4; j++)
             {
@@ -322,12 +293,12 @@ void Gameplay()
                 }
             }
             if (ifappear != 0)
-                ++move;
+                ++moves;
             break;
         case 27:
-            // 退出游戏
             system("cls");
             break;
+
         }
         for (j = 0; j < 4; j++)
         {
@@ -386,7 +357,8 @@ void Gameplay()
 void menu()
 {
     int n;
-    printf("\t\t*****************************************\t\t\n");            //输出游戏菜单的图形
+    //输出游戏菜单的图形
+    printf("\t\t*****************************************\t\t\n");            
     printf("\t\t*              1、开始游戏              *\n");
     printf("\t\t*              2、游戏规则              *\n");
     printf("\t\t*              3、退出游戏              *\n");
@@ -396,28 +368,39 @@ void menu()
     switch (n)
     {
     case 1:
-        Gameplay();                                                         //游戏开始函数
+        //游戏开始函数
+        Gameplay();                                                         
         break;
     case 2:
-        explation();                                                       //游戏规则函数
+        //游戏规则函数
+        explation();                                                      
         break;
     case 3:
-        close();                                                          //关闭游戏函数
+        //关闭游戏函数
+        close();                                                          
         break;
     }
 }
-int main()
+void play3()
 {
     int j, i;
-    for (j = 0; j < 4; j++)             //对4*4进行初始赋值为0
+    //对4*4进行初始赋值为0
+    for (j = 0; j < 4; j++)             
         for (i = 0; i < 4; i++)
             num[j][i] = 0;
-    gamew = 0;                        //游戏获胜的判断变量初始化
-    gamef = 0;                       //游戏失败的判断变量初始化
-    ifappear = 0;                   //判断是否应该随机出现2或4的变量初始化
-    score = 0;                     //游戏得分变量初始化
-    gameover = 0;                 //游戏是否结束的变量初始化
-    move = 0;                    //游戏的移动步数初始化
-    menu();                     //调用主菜单函数
-    return 0;
+    //游戏获胜的判断变量初始化
+    gamew = 0;          
+    //游戏失败的判断变量初始化
+    gamef = 0;                       
+    //判断是否应该随机出现2或4的变量初始化
+    ifappear = 0;                   
+    //游戏得分变量初始化
+    score = 0;                 
+    //游戏是否结束的变量初始化
+    gameover = 0;              
+    //游戏的移动步数初始化
+    moves = 0;               
+    //调用主菜单函数
+    menu();                     
+    //return 0;
 }

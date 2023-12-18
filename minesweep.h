@@ -1,9 +1,9 @@
 //#pragma once
 #ifndef MINESWEEP_H
 #define MINESWEEP_H
-#include<stdio.h>
 #include<graphics.h>
 #include<time.h>
+#include<iostream>
 //地图大小 用map_row map_col控制地图大小
 	int map_row, map_col;
 //翻开的次数

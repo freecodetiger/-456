@@ -1,11 +1,10 @@
 #pragma once
 #ifndef FIVE_H
 #define FIVE_H
-#include <stdio.h>
 #include <graphics.h>
 #define MAP_ROW 15
 #define MAP_COL 15
-
+#include<iostream>
 int Map[MAP_ROW][MAP_COL];
 
 //游戏初始化

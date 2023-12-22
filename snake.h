@@ -1,3 +1,4 @@
+#pragma once
 #include<stdio.h>
 #include<time.h>
 #include<windows.h>
@@ -16,7 +17,7 @@ typedef struct SNAKE //蛇身的一个节点
 }snake;
 
 //全局变量//
-int score = 0, add = 10;//总得分与每次吃食物得分。
+int scores = 0, add = 10;//总得分与每次吃食物得分。
 int status, sleeptime = 200;//每次运行的时间间隔
 snake* head, * food;//蛇头指针，食物指针
 snake* q;//遍历蛇的时候用到的指针
@@ -125,7 +126,7 @@ int biteself()//判断是否咬到了自己
 
 void createfood()//随机出现食物
 {
-   snake* food_1;
+    snake* food_1;
     //rand()函数用于生成一个0~RAND_MAX之间的随机数
     srand((unsigned)time(NULL));
     //malloc()函数用于申请内存空间，sizeof()函数用于计算结构体的大小
@@ -140,7 +141,7 @@ void createfood()//随机出现食物
     //指向头节点
     q = head;
     //当q->next不为空时，循环
-    while (q->next ==NULL)
+    while (q->next == NULL)
     {
         if (q->x == food_1->x && q->y == food_1->y) //判断蛇身是否与食物重合
         {
@@ -157,7 +158,7 @@ void createfood()//随机出现食物
 void cantcrosswall()//不能穿墙
 {
     //如果head的x坐标为0或者56，或者head的y坐标为0或者26，则游戏结束
-if (head->x == 0 || head->x == 56 || head->y == 0 || head->y == 26)
+    if (head->x == 0 || head->x == 56 || head->y == 0 || head->y == 26)
     {
         endgamestatus = 1;
         endgame();
@@ -187,7 +188,7 @@ void snakemove()//蛇前进,上U,下D,左L,右R
                 printf("■");
                 q = q->next;
             }
-            score = score + add;
+            scores = scores + add;
             createfood();
         }
         else                                               //如果没有食物//
@@ -222,7 +223,7 @@ void snakemove()//蛇前进,上U,下D,左L,右R
                 printf("■");
                 q = q->next;
             }
-            score = score + add;
+            scores = scores + add;
             createfood();
         }
         else                               //没有食物
@@ -451,10 +452,10 @@ void gamestart()//游戏初始化
     createfood();
 }
 
-int main()
+void play6()
 {
     gamestart();
     gamecircle();
     endgame();
-    return 0;
+   // return 0;
 }

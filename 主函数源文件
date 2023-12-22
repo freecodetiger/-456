@@ -6,6 +6,8 @@
 #include "bird.h"
 #include "rock.h"
 #include "logo.h"
+#include "snake.h"
+#include "doublelook.h"
 int main() {
 	int x;
 	cout << "输入数字1进入生命游戏" << endl;
@@ -14,6 +16,9 @@ int main() {
 	cout << "输入数字4进入2048" << endl;
 	cout << "输入数字5进入小鸟飞飞飞" << endl;
 	cout << "输入数字6进入猜拳" << endl;
+	cout << "输入数字7进入贪吃蛇 " << endl;
+	cout << "输入数字8进入连连看" << endl;
+
 	cin >> x;
 	switch (x) {
 	case 1: logo(); play(); break;
@@ -22,6 +27,8 @@ int main() {
 	case 4:logo4(); play3(); break;
 	case 5:logo5(); play4(); break;
 	case 6:logo6(); play5(); break;
+	case 7:logo7(); play6(); break;
+	case 8:logo8(); play7(); break;
 	default:cout << "输入的数字不在考虑范围内" << endl;
 	}
 }
